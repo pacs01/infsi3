@@ -2,7 +2,7 @@
 
 \subsection{HTTP Basics}
 
-HTTP ist \textbf{Zustandslos}: Der Client sendet eine Anfrage (\textbf{Request}) an den Server, welcher ihn verarbeitet und anschliessend das Resultat als Antwort (\textbf{Response}) zurücksendet.\\
+HTTP ist \textbf{Zustandslos}: Der Client sendet eine Anfrage (\textbf{Request}) an den Server, welcher sie verarbeitet und anschliessend das Resultat als Antwort (\textbf{Response}) zurücksendet.\\
 
 \begin{figure}[H]
 	\centering
@@ -57,7 +57,10 @@ Zwischen HTTP GET und POST gibt es einen wesentlichen Unterschied. Da der Server
 	\caption{Übliche HTTP Statuscodes, \url{https://de.wikipedia.org/wiki/HTTP-Statuscode}}
 \end{table}
 
-\subsection{Redirect after succesful login}
+\subsection{ZAP Inspection Proxy}
+ZAP ist ein Inspection Proxy für die Analyse von Web Anwendungen. Der Proxy terminiert auch SSL-Verbindungen und verschlüsselt diese anschliessend neu. Dadurch können auch SSL-Verbindungen analysiert werden. (Dies jedoch nur ohne Fehlermeldung beim User, wenn das Proxy-CA im Browser als Trusted importiert ist, wie dies bei Unternehmens-Proxy häufig der Fall ist.)
+
+\subsection{Redirect after succesful Login}
 Unter diesem Namen verbirgt sich ein Pattern, um die "'\textbf{Back Button Relogin Vulnerability}"' zu adressieren. Ohne Anwendung dieses Patterns besteht die Möglichkeit, dass nach mehrmaligem Klick auf Zurück die eingegebenen Logindaten erneut an den Server übertragen werden. Bei Fehlschlag des Logins kann mittels eines gewöhnlichen \textit{200 OK} um eine erneute Eingabe gebeten werden.
 
 \begin{figure}[H]
@@ -67,10 +70,10 @@ Unter diesem Namen verbirgt sich ein Pattern, um die "'\textbf{Back Button Relog
 
 Es gibt dabei mehrere Varianten für den Redirect:
 \begin{easylist}
-	& Type 1 (302 Moved Temporarily)
+	& Type 1 (302 Moved Temporarily) - \textbf{Browser-Memory Reset}
 	&& HTTP Response Status 302
 	&& HTTP Response Header "'Location: http://other-site/"'
-	& Type 2 (200 OK)
+	& Type 2 (200 OK) - \textbf{Daten in Browser-Memory gespeichert!}
 	&& HTTP Response Status 200
 	&& HTTP Response Header "'Refresh: 0; URL=http://other-site/"'
 	& Type 3 (200 OK)
@@ -79,12 +82,16 @@ Es gibt dabei mehrere Varianten für den Redirect:
 	& Type 4 (Javascript)
 	&& Client-Seitiger Code (z.B. "'document.location=\ldots"')
 \end{easylist}
+In der Praxis sind nur die Varianten 1 und 4 relevant.
 
 \subsection{HTTP Session Management}
-Serverseitig wird eine Speicherstruktur erstellt, um Session-Daten zu speichern. Der Client erhält ein Schlüssel zu dieser Struktur, auch bekannt als \textit{SessionId}.\\
-Bei jeder Anfrage des Clients an den Server muss dieser die \textit{SessionId} mitgeben, damit der Server auf die Daten der Session zugreifen kann. Dazu gibt es mehrere Varianten, wo sich die SessionId befindet (\textbf{Session Locations}):
+Serverseitig wird eine Speicherstruktur erstellt, um Session-Daten zu speichern. Der Client erhält einen Schlüssel zu dieser Struktur, auch bekannt als \textit{SessionID}.\\
+Bei jeder Anfrage des Clients an den Server muss dieser die \textit{SessionID} mitgeben, damit der Server auf die Daten der Session zugreifen kann. Dazu gibt es mehrere Varianten, wo sich die SessionID befindet (\textbf{Session Locations}):
 \begin{easylist}[itemize]
 	& URI
+	&& Zwei Varianten
+	&&& Cookieless: \textit{GET /(fkw4n0ymyzrfsdrh1pcfykmj)/login.aspx}
+	&&& Query-Parameter: \textit{GET /index.html?session=123}
 	&& Sichtbar in Logs
 	&& Problematisch beim Caching
 	& Request Header
@@ -104,7 +111,7 @@ expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.google.ch
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\textwidth]{./img/cookie-creation}
-	\caption{Cookie erzeugung über HTTP Request Header}
+	\caption{Cookie Erzeugung über HTTP Request Header}
 \end{figure}
 
 \subsubsection{Cookie Attribute}
@@ -114,29 +121,43 @@ expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.google.ch
 	&& Name: Cookie Name
 	&& Content: Cookie Value
 	&& Beispiel: jsessionid=klrezbxur234kls
-	& \textbf{Domain}
+	& \textbf{Domain} (domain=.google.com)
 	&& Ort wohin das Cookie gesendet werden kann.
-	&& Default: Cookie wird nur an den Server gesendet, von dem es stammt.
-	& \textbf{Path}
+	&& Default: No domain: Cookie wird nur an den Server gesendet, von dem es stammt.
+	& \textbf{Path} (path=/app)
 	&& URL-Path wohin das Cookie gesendet werden kann.
-	&& Default: Cookie wird nur an den Pfad gesendet, von dem es stammt.
-	& \textbf{Secure}
+	&& Default: No path: Cookie wird nur an den Pfad gesendet, von dem es stammt.
+	& \textbf{Secure} (Secure (flag only))
 	&& Cookie wird nur über HTTPS übermittelt.
 	&& Default: insecure
-	& \textbf{Expire}
+	& \textbf{Expires} (expires: Sun, 17-Jan-2038 19:14:07 GMT)
 	&& Gültigkeit des Cookies.
-	&& Default: wird nicht persistiert, nur Browsersession.
-	& \textbf{HttpOnly}
-	&& Cookie kann nicht von JavaScript verwendet werden.
-	&& Default: nicht vorhanden, JavaScript kann mit document.cookie darauf zugreifen.
+	&& Default: No date: Cookie wird nicht persistiert, nur Browsersession.
+	& \textbf{HttpOnly} (HttpOnly (flag only))
+	&& Auf Cookie kann nicht aus JavaScript Code zugegriffen werden.
+	&& Default: nicht vorhanden: JavaScript kann mit document.cookie darauf zugreifen.
 \end{easylist}
 
 Wann ein Cookie \textbf{an den Server gesendet} wird, ist abhängig von mehreren Attributen: Domain, Path, Secure und Expire.\\
-Das HttpOnly Attribut bietet ein Schutz gegenüber XSS, wobei es dem JavaScript, welches eingeschleust wurde, verhindert wird, auf das Cookie zuzugreifen.
+Das HttpOnly Attribut bietet einen Schutz vor XSS, wobei es JavaScript Code, welcher eingeschleust wurde, verbietet, auf das Cookie zuzugreifen.
+
+Beispiel: Temporäres Cookie (non-persistent), dass nur per HTTPS zur Ursprungsseite übertragen wird:
+\textit{Set-Cookie: SESSION=123; path=/app; Secure; HTTPOnly}
+
 
 \subsubsection{SSL Session ID}
-Mithilfe der \textit{SSL Session ID} können SSL-Session weiter verwendet werden, ohne einen erneuten Handshake durchzuführen. Ähnlich wie bei Cookies werden diese zu beginn der Anfrage an den Server übermittelt, welcher den zur ID passenden symmetrischen Schlüssel besitzt.\\
-Der gesamte Payload des SSL-Pakets ist verschlüsselt, man sieht also weder die URL noch andere Inhalte des HTTP-Paket.
+Mithilfe der \textit{SSL Session ID} können SSL-Sessions weiter verwendet werden, ohne einen erneuten Handshake durchzuführen. Ähnlich wie bei Cookies werden diese zu beginn der Anfrage an den Server übermittelt, welcher den zur ID passenden symmetrischen Schlüssel besitzt.\\
+Der gesamte Payload des SSL-Pakets ist verschlüsselt, man sieht also weder die URL noch andere Inhalte des HTTP-Pakets.
+
+\subsection{Session Fixation}
+Bei einer Session Fixation Attacke erzeugt der Hacker bei der verwundbaren Webseite eine Session (ohne Login). Diese Session wird nun dem Opfer mit einem Link mitgeteilt. Das Opfer authentifiziert sich auf der Webseite unter Verwendung dieser Session und ermöglicht es somit dem Hacker, die authentifizierte Session zu benützen.
+
+Abwehrmassnahmen:
+\begin{easylist}[itemize]
+	& Neue Session erzeugen nach erfolgreicher Authentifizierung
+	& Cookies verwenden, um die SessionID zu speichern
+	& Cookies mit den entsprechenden Attributen sichern
+\end{easylist}
 
 \subsection{Cross Site Scripting - XSS}
 Die Gefahr für XSS entsteht, wenn Benutzereingaben unzureichend gefiltert werden und unverändert wieder an andere Benutzer ausgeliefert werden. Dies ermöglicht z.B. die Übernahme von Sessions, HTML- oder JS-Injection, Exploit injection oder Keylogging.\\
@@ -150,13 +171,21 @@ Es werden drei Typen von Attacken unterschieden:
 Mögliche \textbf{Gegenmassnahmen} sind:
 \begin{description}
 	\item[HTML entities] Encoding vor dem Speichern und bei der Ausgabe.
+	\item[Client Security] X-XSS-Protection
 	\item[HTTP Only Cookies] Auslesen über JS nicht möglich.
 	\item[CSP] Content Security Policy: \lstinline|script-src 'self'|
 \end{description}
 
 \subsection{Same Origin Policy}
-Die damit wird verhindert, dass Javascript (auch Flash, Java Applet, etc.) auf DOM und Cookies zugreifen kann. Nur bei der Übereinstimmung von \textbf{Protokoll, Host und Port} wird dies erlaubt.\\
-Wird nun aber in der Ursprungs-Seite das 3rd-Party-Script durch \lstinline|<script src="...">| geladen, so kann es auf das Cookie der Ursprungs-Seite zugreifen.\\
+Damit wird verhindert, dass Script-Code von einer Website auf DOM und Cookies einer anderen Website zugreifen kann. Nur bei Übereinstimmung der \textbf{Origin}, also gleichem \textbf{Protokoll, Hostname und Port}, wird dies erlaubt.\\
+Folgende Scripts werden von der SOP behandelt:
+\begin{easylist}[itemize]
+	& JavaScript
+	& XMLHttpRequest (XHR), XDomainRequest (XDR)
+	& Java Applet, Adobe Flash, Microsoft Silverlight, ActiveX
+	& Browser Extensions und Plugins
+\end{easylist}
+Wird nun aber in der Ursprungs-Seite ein 3rd-Party-Script durch \lstinline|<script src="...">| geladen, so kann es auf Cookies der Ursprungs-Seite zugreifen.\\
 Die Übermittlung von Daten an fremde Seiten kann dann über Bild-Tags erfolgen, da diese nicht der SOP unterliegen.\\
 Wird der Javascript-Code über die URL injiziert, so spricht man von \textbf{Reflected XSS}. Der XSS-Schutz im Browser kann dies verhindern, aber nicht bei \textbf{Stored XSS}.
 
@@ -240,3 +269,22 @@ Google Chrome wie auch Firefox verwenden \textbf{Preload-Listen}. Damit wird die
 \begin{lstlisting}[language={},caption=Beispiel des HPKP-Headers]
 Public-Key-Pins: pin-sha256="base64=="; max-age=expireTime [; includeSubdomains][; report-uri="reportURI"]
 \end{lstlisting}
+
+\subsection{SQL Injection}
+Der Angreifer versucht dabei, über die Anwendung, die den Zugriff auf die Datenbank bereitstellt, eigene Datenbankbefehle einzuschleusen. Dies wird durch Sicherheitslücken ermöglicht, die durch \textbf{mangelnde Maskierung oder Überprüfung von Metazeichen in Benutzereingaben} entstehen. Solche Schwachstellen sind im Code leicht zu erkennen, beim Testen jedoch nicht mehr.
+Beispiele
+\begin{easylist}[itemize]
+	& SELECT * FROM Users WHERE Username='\textcolor{red}{Muster}' AND Password='\textcolor{red}{'OR''='}'
+	& SELECT 1, 2, 3 FROM Employees WHERE City='\textcolor{red}{'UNION ALL SELECT OtherField, '', '' FROM OtherTable WHERE ''='}'
+\end{easylist}
+
+\subsubsection{Time Based Blind SQL Injection}
+SQL Injection, bei der man keine Fehlermeldung sieht aber anhand der Antwortzeit auswertet, ob es sich um einen erfolgreichen Angriff handelt oder nicht. Die Antwortzeit kann durch \textbf{datenbankinterne Benchmark-Funktionen} verlängert werden.
+
+\subsubsection{Gegenmassnahmen}
+Als Gegenmassnahme sollte \textbf{in erster Priorität das Problem im Sourcecode behoben werden}. Anschliessend kann als generellen Schutz eine WAF (Web Application Firewall) vorgeschaltet werden und der mögliche Schaden durch hardening des DB-Servers weiter eingegrenzt werden.
+
+\begin{description}
+	\item[Secure Programming] Prepared Statements (Java), Parameters Collections (.NET), Stored Procedures (DB), Proper Error Handling, no plaintext passwords in database
+	\item[Second Line of Defense] WAF, Input Validation, Encoding \item[Database Hardening] pro Datenbank eine DB-Instanz, Administrator Account nicht für Applikations-Zugriff verwenden, Default Admin Accounts deaktivieren, mehrere Benutzer für verschiedene Module der Applikation, restriktive Berechtigungen (\textit{Principle of least privilege}), Views für Read-Only
+\end{description}
