@@ -159,6 +159,25 @@ Abwehrmassnahmen:
 	& Cookies mit den entsprechenden Attributen sichern
 \end{easylist}
 
+\subsection{SQL Injection}
+Der Angreifer versucht dabei, über die Anwendung, die den Zugriff auf die Datenbank bereitstellt, eigene Datenbankbefehle einzuschleusen. Dies wird durch Sicherheitslücken ermöglicht, die durch \textbf{mangelnde Maskierung oder Überprüfung von Metazeichen in Benutzereingaben} entstehen. Solche Schwachstellen sind im Code leicht zu erkennen, beim Testen jedoch nicht mehr.
+Beispiele
+\begin{easylist}[itemize]
+	& SELECT * FROM Users WHERE Username='\textcolor{red}{Muster}' AND Password='\textcolor{red}{'OR''='}'
+	& SELECT 1, 2, 3 FROM Employees WHERE City='\textcolor{red}{'UNION ALL SELECT OtherField, '', '' FROM OtherTable WHERE ''='}'
+\end{easylist}
+
+\subsubsection{Time Based Blind SQL Injection}
+SQL Injection, bei der man keine Fehlermeldung sieht aber anhand der Antwortzeit auswertet, ob es sich um einen erfolgreichen Angriff handelt oder nicht. Die Antwortzeit kann durch \textbf{datenbankinterne Benchmark-Funktionen} verlängert werden.
+
+\subsubsection{Gegenmassnahmen}
+Als Gegenmassnahme sollte \textbf{in erster Priorität das Problem im Sourcecode behoben werden}. Anschliessend kann als generellen Schutz eine WAF (Web Application Firewall) vorgeschaltet werden und der mögliche Schaden durch hardening des DB-Servers weiter eingegrenzt werden.
+
+\begin{description}
+	\item[Secure Programming] Prepared Statements (Java), Parameters Collections (.NET), Stored Procedures (DB), Proper Error Handling, no plaintext passwords in database
+	\item[Second Line of Defense] WAF, Input Validation, Encoding \item[Database Hardening] pro Datenbank eine DB-Instanz, Administrator Account nicht für Applikations-Zugriff verwenden, Default Admin Accounts deaktivieren, mehrere Benutzer für verschiedene Module der Applikation, restriktive Berechtigungen (\textit{Principle of least privilege}), Views für Read-Only
+\end{description}
+
 \subsection{Cross Site Scripting - XSS}
 Die Gefahr für XSS entsteht, wenn Benutzereingaben unzureichend gefiltert werden und unverändert wieder an andere Benutzer ausgeliefert werden. Dies ermöglicht z.B. die Übernahme von Sessions, HTML- oder JS-Injection, Exploit injection oder Keylogging.\\
 Es werden drei Typen von Attacken unterschieden:
@@ -269,22 +288,3 @@ Google Chrome wie auch Firefox verwenden \textbf{Preload-Listen}. Damit wird die
 \begin{lstlisting}[language={},caption=Beispiel des HPKP-Headers]
 Public-Key-Pins: pin-sha256="base64=="; max-age=expireTime [; includeSubdomains][; report-uri="reportURI"]
 \end{lstlisting}
-
-\subsection{SQL Injection}
-Der Angreifer versucht dabei, über die Anwendung, die den Zugriff auf die Datenbank bereitstellt, eigene Datenbankbefehle einzuschleusen. Dies wird durch Sicherheitslücken ermöglicht, die durch \textbf{mangelnde Maskierung oder Überprüfung von Metazeichen in Benutzereingaben} entstehen. Solche Schwachstellen sind im Code leicht zu erkennen, beim Testen jedoch nicht mehr.
-Beispiele
-\begin{easylist}[itemize]
-	& SELECT * FROM Users WHERE Username='\textcolor{red}{Muster}' AND Password='\textcolor{red}{'OR''='}'
-	& SELECT 1, 2, 3 FROM Employees WHERE City='\textcolor{red}{'UNION ALL SELECT OtherField, '', '' FROM OtherTable WHERE ''='}'
-\end{easylist}
-
-\subsubsection{Time Based Blind SQL Injection}
-SQL Injection, bei der man keine Fehlermeldung sieht aber anhand der Antwortzeit auswertet, ob es sich um einen erfolgreichen Angriff handelt oder nicht. Die Antwortzeit kann durch \textbf{datenbankinterne Benchmark-Funktionen} verlängert werden.
-
-\subsubsection{Gegenmassnahmen}
-Als Gegenmassnahme sollte \textbf{in erster Priorität das Problem im Sourcecode behoben werden}. Anschliessend kann als generellen Schutz eine WAF (Web Application Firewall) vorgeschaltet werden und der mögliche Schaden durch hardening des DB-Servers weiter eingegrenzt werden.
-
-\begin{description}
-	\item[Secure Programming] Prepared Statements (Java), Parameters Collections (.NET), Stored Procedures (DB), Proper Error Handling, no plaintext passwords in database
-	\item[Second Line of Defense] WAF, Input Validation, Encoding \item[Database Hardening] pro Datenbank eine DB-Instanz, Administrator Account nicht für Applikations-Zugriff verwenden, Default Admin Accounts deaktivieren, mehrere Benutzer für verschiedene Module der Applikation, restriktive Berechtigungen (\textit{Principle of least privilege}), Views für Read-Only
-\end{description}
