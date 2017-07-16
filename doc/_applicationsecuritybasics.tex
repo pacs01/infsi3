@@ -57,10 +57,10 @@ Zwischen HTTP GET und POST gibt es einen wesentlichen Unterschied. Da der Server
 	\caption{Übliche HTTP Statuscodes, \url{https://de.wikipedia.org/wiki/HTTP-Statuscode}}
 \end{table}
 
-\subsection{ZAP Inspection Proxy}
+\subsubsection{ZAP Inspection Proxy}
 ZAP ist ein Inspection Proxy für die Analyse von Web Anwendungen. Der Proxy terminiert auch SSL-Verbindungen und verschlüsselt diese anschliessend neu. Dadurch können auch SSL-Verbindungen analysiert werden. (Dies jedoch nur ohne Fehlermeldung beim User, wenn das Proxy-CA im Browser als Trusted importiert ist, wie dies bei Unternehmens-Proxy häufig der Fall ist.)
 
-\subsection{Redirect after succesful Login}
+\subsubsection{Redirect after succesful Login}
 Unter diesem Namen verbirgt sich ein Pattern, um die "'\textbf{Back Button Relogin Vulnerability}"' zu adressieren. Ohne Anwendung dieses Patterns besteht die Möglichkeit, dass nach mehrmaligem Klick auf Zurück die eingegebenen Logindaten erneut an den Server übertragen werden. Bei Fehlschlag des Logins kann mittels eines gewöhnlichen \textit{200 OK} um eine erneute Eingabe gebeten werden.
 
 \begin{figure}[H]
@@ -84,7 +84,7 @@ Es gibt dabei mehrere Varianten für den Redirect:
 \end{easylist}
 In der Praxis sind nur die Varianten 1 und 4 relevant.
 
-\subsection{HTTP Session Management}
+\subsubsection{HTTP Session Management}
 Serverseitig wird eine Speicherstruktur erstellt, um Session-Daten zu speichern. Der Client erhält einen Schlüssel zu dieser Struktur, auch bekannt als \textit{SessionID}.\\
 Bei jeder Anfrage des Clients an den Server muss dieser die \textit{SessionID} mitgeben, damit der Server auf die Daten der Session zugreifen kann. Dazu gibt es mehrere Varianten, wo sich die SessionID befindet (\textbf{Session Locations}):
 \begin{easylist}[itemize]
@@ -101,7 +101,7 @@ Bei jeder Anfrage des Clients an den Server muss dieser die \textit{SessionID} m
 	&& Kaum verbreitet
 \end{easylist}
 
-\subsection{Cookies}
+\subsubsection{Cookies}
 
 \begin{verbatim}
 Set-Cookie: PREF=ID=2744d38c32b2ec68:LD=de:TM=1094031009
@@ -114,8 +114,7 @@ expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.google.ch
 	\caption{Cookie Erzeugung über HTTP Request Header}
 \end{figure}
 
-\subsubsection{Cookie Attribute}
-
+\textbf{Cookie Attribute}
 \begin{easylist}[itemize]
 	& \textbf{Name=Content} (Key, value pair)
 	&& Name: Cookie Name
@@ -144,12 +143,14 @@ Das HttpOnly Attribut bietet einen Schutz vor XSS, wobei es JavaScript Code, wel
 Beispiel: Temporäres Cookie (non-persistent), dass nur per HTTPS zur Ursprungsseite übertragen wird:
 \textit{Set-Cookie: SESSION=123; path=/app; Secure; HTTPOnly}
 
-
 \subsubsection{SSL Session ID}
 Mithilfe der \textit{SSL Session ID} können SSL-Sessions weiter verwendet werden, ohne einen erneuten Handshake durchzuführen. Ähnlich wie bei Cookies werden diese zu beginn der Anfrage an den Server übermittelt, welcher den zur ID passenden symmetrischen Schlüssel besitzt.\\
 Der gesamte Payload des SSL-Pakets ist verschlüsselt, man sieht also weder die URL noch andere Inhalte des HTTP-Pakets.
 
-\subsection{Session Fixation}
+\subsection{Angriffsszenarien}
+Nebst der bereits erwähnten \textbf{Back Button Relogin Vulnerability} existieren noch weitere gängige Angriffsszenarien.
+
+\subsubsection{Session Fixation}
 Bei einer Session Fixation Attacke erzeugt der Hacker bei der verwundbaren Webseite eine Session (ohne Login). Diese Session wird nun dem Opfer mit einem Link mitgeteilt. Das Opfer authentifiziert sich auf der Webseite unter Verwendung dieser Session und ermöglicht es somit dem Hacker, die authentifizierte Session zu benützen.
 
 Abwehrmassnahmen:
@@ -159,7 +160,7 @@ Abwehrmassnahmen:
 	& Cookies mit den entsprechenden Attributen sichern
 \end{easylist}
 
-\subsection{SQL Injection}
+\subsubsection{SQL Injection}
 Der Angreifer versucht dabei, über die Anwendung, die den Zugriff auf die Datenbank bereitstellt, eigene Datenbankbefehle einzuschleusen. Dies wird durch Sicherheitslücken ermöglicht, die durch \textbf{mangelnde Maskierung oder Überprüfung von Metazeichen in Benutzereingaben} entstehen. Solche Schwachstellen sind im Code leicht zu erkennen, beim Testen jedoch nicht mehr.
 Beispiele
 \begin{easylist}[itemize]
@@ -167,10 +168,10 @@ Beispiele
 	& SELECT 1, 2, 3 FROM Employees WHERE City='\textcolor{red}{'UNION ALL SELECT OtherField, '', '' FROM OtherTable WHERE ''='}'
 \end{easylist}
 
-\subsubsection{Time Based Blind SQL Injection}
-SQL Injection, bei der man keine Fehlermeldung sieht aber anhand der Antwortzeit auswertet, ob es sich um einen erfolgreichen Angriff handelt oder nicht. Die Antwortzeit kann durch \textbf{datenbankinterne Benchmark-Funktionen} verlängert werden.
+\textbf{Time Based Blind SQL Injection}\\
+SQL Injection, bei der man keine Fehlermeldung sieht aber anhand der Antwortzeit auswertet, ob es sich um einen erfolgreichen Angriff handelt oder nicht. Die Antwortzeit kann durch \textbf{datenbankinterne Benchmark-Funktionen} verlängert werden.\\
 
-\subsubsection{Gegenmassnahmen}
+\textbf{Gegenmassnahmen}\\
 Als Gegenmassnahme sollte \textbf{in erster Priorität das Problem im Sourcecode behoben werden}. Anschliessend kann als generellen Schutz eine WAF (Web Application Firewall) vorgeschaltet werden und der mögliche Schaden durch hardening des DB-Servers weiter eingegrenzt werden.
 
 \begin{description}
@@ -178,7 +179,7 @@ Als Gegenmassnahme sollte \textbf{in erster Priorität das Problem im Sourcecode
 	\item[Second Line of Defense] WAF, Input Validation, Encoding \item[Database Hardening] pro Datenbank eine DB-Instanz, Administrator Account nicht für Applikations-Zugriff verwenden, Default Admin Accounts deaktivieren, mehrere Benutzer für verschiedene Module der Applikation, restriktive Berechtigungen (\textit{Principle of least privilege}), Views für Read-Only
 \end{description}
 
-\subsection{Cross Site Scripting - XSS}
+\subsubsection{Cross Site Scripting - XSS}
 Die Gefahr für XSS entsteht, wenn Benutzereingaben unzureichend gefiltert werden und unverändert wieder an andere Benutzer ausgeliefert werden. Dies ermöglicht z.B. die Übernahme von Sessions, HTML- oder JS-Injection, Exploit injection oder Keylogging.\\
 Es werden drei Typen von Attacken unterschieden:
 \begin{description}
@@ -195,7 +196,29 @@ Mögliche \textbf{Gegenmassnahmen} sind:
 	\item[CSP] Content Security Policy: \lstinline|script-src 'self'|
 \end{description}
 
-\subsection{Same Origin Policy}
+\subsubsection{JSON-Hijacking}
+JSON-Hijacking zielt darauf ab, sensitive Daten, die in JSON Format an einen authentifizierten Empfänger übermittelt werden, zu stehlen. Dabei präpariert der Angreifer eine Seite mit einem JavaScript, welches die Callback-Funktion, den \textit{Property Setter} oder den \textit{Array-Constructor} überschreibt. Als zweites wird ein GET Request auf die verwundbare Seite durchgeführt. Die Response kann dann vom Angreifer verarbeitet und die Daten gespeichert werden.\\
+
+\textbf{Lösung:}
+\begin{easylist}
+	& Token in Request URLs verwenden, sodass diese nicht erraten werden können
+	& JSON Response mit einem Infinite Loop beginnen
+	& JSONP vermeiden (JSONP-Aufrufe sind \textbf{immer verwundbar} für JSON-Hijacking)
+	& Arrays in ein JSON-Objekt einbetten
+\end{easylist}
+
+\subsubsection{Clickjacking-Attacke}
+Dabei wird dem Opfer ein Frame über einen anderen Inhalt gelegt und so versucht, durch Klicken Aktionen auf dem dahinter liegenden Objekt auszuführen.\\
+Gegenmassnahme: Die \textbf{X-Frame-Options} im HTTP Response Header kann verwendet werden, um zu bestimmen, ob ein aufrufender Browser die Zielseite in einem \lstinline|<frame>|, \lstinline|<iframe>| oder \lstinline|<object>| rendern darf. Webseiten können so unterbinden, dass ihr Content in fremden Seiten eingebettet wird.
+\textbf{CSP hat Vorrang} vor X-Frame-Headers, weil die Unterbindung von Frames seit Version 2.0 dort auch integriert ist.
+
+\begin{lstlisting}[caption=Clickjacking mittels X-Frame-Options unterbinden, language={}]
+X-Frame-Options: DENY [SAMEORIGIN, ALLOW-FROM https://example.com/]
+\end{lstlisting}
+
+\subsection{Sicherheitskonzepte}
+
+\subsubsection{Same Origin Policy}
 Damit wird im Browser verhindert, dass clientseitiger Script-Code von einer Website auf DOM und Cookies einer anderen Website zugreifen kann. Nur bei Übereinstimmung der \textbf{Origin}, also gleichem \textbf{Protokoll, Hostname und Port}, wird dies erlaubt.\\
 Folgende Scripts werden von der SOP behandelt:
 \begin{easylist}[itemize]
@@ -208,13 +231,12 @@ Wird nun aber in der Ursprungs-Seite ein 3rd-Party-Script durch \lstinline|<scri
 Die Übermittlung von Daten an fremde Seiten kann dann über Bild-Tags erfolgen, da diese nicht der SOP unterliegen.\\
 Wird der Javascript-Code über die URL injiziert, so spricht man von \textbf{Reflected XSS}. Der XSS-Schutz im Browser kann dies verhindern, aber nicht bei \textbf{Stored XSS}.
 
-\subsection{Cross Origin Resource Sharing - CORS}
+\subsubsection{Cross Origin Resource Sharing - CORS}
 Dies ist eine mögliche Aufweichung der SOP, denn manchmal ist gerade eine Cross-Domain-Kommunikation zwingend erforderlich.
 Damit schützt sich beispielsweise ein Service-Anbieter (z.B. Google-API), welcher seine Daten ausschliesslich für berechtigte Nutzer oder weitere eigene Domains (z.B. youtube.com) zur Verfügung stellen möchte.\\
-Anfragen an den Service Provider enthalten einen Header \lstinline|Origin: http://foo.example.com|. Die Antwort darauf den Header \lstinline|Access-Control-Allow-Origin: http://foo.example.com| (Es sind auch Wildcards möglich).
+Anfragen an den Service Provider enthalten einen Header \lstinline|Origin: http://foo.example.com|. Die Antwort darauf den Header \lstinline|Access-Control-Allow-Origin: http://foo.example.com| (Es sind auch Wildcards möglich).\\
 
-\subsubsection{CORS Preflighted Request}
-
+\textbf{CORS Preflighted Request}\\
 Im Gegensatz zur simplen Anfrage wird beim Preflighted Request zuerst über einen HTTP-OPTIONS-Request abgefragt, ob der eigentliche Request sicher gesendet werden kann. Dies wird bei Anfragen gemacht, auf die eine der folgenden Bedingungen zutrifft:
 \begin{easylist}[itemize]
 	& Verwendung einer Methode ausser GET, HEAD oder POST.
@@ -230,7 +252,7 @@ Im Gegensatz zur simplen Anfrage wird beim Preflighted Request zuerst über eine
 
 Standardmässig werden bei Cross-Site-XMLHttpRequests-Aufrufen keine Credentials (Cookies) mitgeschickt. Um dies zu forcieren, muss ein spezielles Flag (\lstinline|xmlHttp.withCredentials|) auf dem Request-Objekt gesetzt werden.
 
-\subsection{Content Security Policy - CSP}
+\subsubsection{Content Security Policy - CSP}
 CSP ist ein Sicherheitsstandard, der XSS, Clickjacking und weitere Code-Injection-Attacken verhindern soll. Dabei kann im Server konfiguriert werden, von welcher Origin Content (scripts, images, etc.) geladen werden darf. Treffen auf ein Element mehrere CSPs zu, wird immer die restriktivste benutzt.\\
 CSPs können als HTTP-Response-Header-Feld \textit{Content-Security-Policy} (bei IE 10+ \textit{X-Content-Security-Policy}) oder im HTML Meta Element \lstinline|<meta http-equiv="X-Content-Security-Policy">| definiert werden.
 
@@ -255,27 +277,7 @@ CSP hat folgende Defaults aktiviert:
 	\item URIs sind nur für Bilder erlaubt
 \end{enumerate}
 
-\subsection{JSON-Hijacking}
-JSON-Hijacking zielt darauf ab, sensitive Daten, die in JSON Format an einen authentifizierten Empfänger übermittelt werden, zu stehlen. Dabei präpariert der Angreifer eine Seite mit einem JavaScript, welches die Callback-Funktion, den \textit{Property Setter} oder den \textit{Array-Constructor} überschreibt. Als zweites wird ein GET Request auf die verwundbare Seite durchgeführt. Die Response kann dann vom Angreifer verarbeitet und die Daten gespeichert werden.\\
-
-\textbf{Lösung:}
-\begin{easylist}
-	& Token in Request URLs verwenden, sodass diese nicht erraten werden können
-	& JSON Response mit einem Infinite Loop beginnen
-	& JSONP vermeiden (JSONP-Aufrufe sind \textbf{immer verwundbar} für JSON-Hijacking)
-	& Arrays in ein JSON-Objekt einbetten
-\end{easylist}
-
-\subsection{Clickjacking-Attacke}
-Dabei wird dem Opfer ein Frame über einen anderen Inhalt gelegt und so versucht, durch Klicken Aktionen auf dem dahinter liegenden Objekt auszuführen.\\
-Gegenmassnahme: Die \textbf{X-Frame-Options} im HTTP Response Header kann verwendet werden, um zu bestimmen, ob ein aufrufender Browser die Zielseite in einem \lstinline|<frame>|, \lstinline|<iframe>| oder \lstinline|<object>| rendern darf. Webseiten können so unterbinden, dass ihr Content in fremden Seiten eingebettet wird.
-\textbf{CSP hat Vorrang} vor X-Frame-Headers, weil die Unterbindung von Frames seit Version 2.0 dort auch integriert ist.
-
-\begin{lstlisting}[caption=Clickjacking mittels X-Frame-Options unterbinden, language={}]
-X-Frame-Options: DENY [SAMEORIGIN, ALLOW-FROM https://example.com/]
-\end{lstlisting}
-
-\subsection{HTTP Strict Transport Security - HSTS}
+\subsubsection{HTTP Strict Transport Security - HSTS}
 Ein Sicherheitsmechanismus für HTTPS-Verbindungen. Er soll vor Aushebelung der Verbindungsverschlüsselung durch eine Downgrade-Attacke und vor Session Hijacking schützen. Durch die Angabe des Header-Felds wird jede weitere Verbindung bis zum erreichen des \textit{max-age} als \textbf{HTTPS erzwungen}, auch wenn die Requests z.B. auf HTTP lauten. Zusätzlich wird eine Verbindung mit dem Server verhindert, sobald \textbf{Zertifikatsprobleme} auftauchen.\\
 
 Google Chrome wie auch andere Browser verwenden \textbf{HSTS-Preload-Listen}. Damit wird die Limitierung des \textit{trust on first use}-Prinzip für eine definierte Liste von Domains umgangen.
@@ -287,14 +289,14 @@ Strict-Transport-Security: max-age=31536000
 \textbf{Bypassing HSTS}\\
 HSTS ist Zeit basiert und wird für eine gewisse Zeitspanne definiert. Um dies zu umgehen, wird die aktuelle Zeit geändert, wodurch das HSTS abläuft und der Browser ohne Warnung auf einen Fakeserver zugreifen kann.
 
-\subsection{X-XSS-Protection}
+\subsubsection{X-XSS-Protection}
 Dieser Header aktiviert den XSS-Schutz im Browser, jedoch kann dieser \textbf{nur Reflected XSS} erkennen. Bisher wird es nur von IE, Chrome und Safari unterstützt. In diesen Browsern sollte er jedoch standardmässig aktiviert sein.
 
 \begin{lstlisting}[language={},caption=Beispiel des X-XSS-Protection Headers]
 X-XSS-Protection: 1; mode=block
 \end{lstlisting}
 
-\subsection{HTTP Public Key Pinning - HPKP}
+\subsubsection{HTTP Public Key Pinning - HPKP}
 Eine Erweiterung für HTTP, die dem Webclient mitteilt, einen spezifischen kryptographischen Schlüssel mit einem bestimmten Webserver in Verbindung zu bringen. So sollen Man-in-the-Middle-Angriffe mit gefälschten Zertifikaten vermieden werden.\\
 
 Google Chrome wie auch Firefox verwenden \textbf{Preload-Listen}. Damit wird die Limitierung des \textit{trust on first use}-Prinzip für eine definierte Liste von Domains umgangen.
