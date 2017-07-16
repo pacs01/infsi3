@@ -24,8 +24,9 @@ Viele Anwendungen schützen sensible Daten, wie Kreditkartendaten oder Zugangsin
 \subsection{Missing Function Level Access Control}
 Die meisten betroffenen Anwendungen realisieren Zugriffsberechtigungen nur durch das Anzeigen oder Ausblenden von Funktionen in der Benutzeroberfläche. Allerdings muss auch beim direkten Zugriff auf eine geschützte Funktion eine Prüfung der Zugriffsberechtigung auf dem Server stattfinden, ansonsten können Angreifer durch gezieltes Manipulieren von Anfragen ohne Autorisierung trotzdem auf diese zugreifen.
 
-\subsection{Cross-Site Request Forgery - CSRF}
-Ein CSRF-Angriff bringt den Browser eines angemeldeten Benutzers dazu, einen manipulierten HTTP-Request an die verwundbare Anwendung zu senden. Session Cookies und andere Authentifizierungsinformationen werden dabei automatisch vom Browser mitgesendet. Dies erlaubt es dem Angreifer Aktionen innerhalb der betroffen Anwendungen im Namen und Kontext des angegriffen Benutzers auszuführen.
+\subsection{Cross-Site Request Forgery - CSRF / XSRF}
+Ein CSRF-Angriff bringt den Browser eines angemeldeten Benutzers dazu, einen manipulierten HTTP-Request an die verwundbare Anwendung zu senden. Session Cookies und andere Authentifizierungsinformationen werden dabei automatisch vom Browser mitgesendet. Dies erlaubt es dem Angreifer Aktionen innerhalb der betroffen Anwendungen im Namen und Kontext des angegriffen Benutzers auszuführen.\\
+Gegenmassnahme: Form mit hidden field, das ein zufällig generiertes Token enthält und bei jedem Request serverseitig geprüft werden muss.
 
 \subsection{Using Components with Known Vulnerabilities}
 Komponenten wie z.B. Bibliotheken, Frameworks oder andere Softwaremodule werden meistens mit vollen Berechtigungen ausgeführt. Wenn eine verwundbare Komponente ausgenutzt wird, kann ein solcher Angriff zu schwerwiegendem Datenverlust oder bis zu einer Serverübernahme führen. Applikationen, die Komponenten mit bekannten Schwachstellen einsetzen, können Schutzmassnahmen unterlaufen und so zahlreiche Angriffe und Auswirkungen ermöglichen.

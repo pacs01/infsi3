@@ -196,7 +196,7 @@ Mögliche \textbf{Gegenmassnahmen} sind:
 \end{description}
 
 \subsection{Same Origin Policy}
-Damit wird verhindert, dass Script-Code von einer Website auf DOM und Cookies einer anderen Website zugreifen kann. Nur bei Übereinstimmung der \textbf{Origin}, also gleichem \textbf{Protokoll, Hostname und Port}, wird dies erlaubt.\\
+Damit wird im Browser verhindert, dass clientseitiger Script-Code von einer Website auf DOM und Cookies einer anderen Website zugreifen kann. Nur bei Übereinstimmung der \textbf{Origin}, also gleichem \textbf{Protokoll, Hostname und Port}, wird dies erlaubt.\\
 Folgende Scripts werden von der SOP behandelt:
 \begin{easylist}[itemize]
 	& JavaScript
@@ -209,14 +209,16 @@ Die Übermittlung von Daten an fremde Seiten kann dann über Bild-Tags erfolgen,
 Wird der Javascript-Code über die URL injiziert, so spricht man von \textbf{Reflected XSS}. Der XSS-Schutz im Browser kann dies verhindern, aber nicht bei \textbf{Stored XSS}.
 
 \subsection{Cross Origin Resource Sharing - CORS}
-Damit schützt sich nicht der eigentliche Webseitenbetreiber, sondern ein Serivce-Provider, welcher Daten für den Betreiber bereitstellt. Anfragen an den Service-Provider enthalten ein Header \lstinline|Origin: http://foo.example.com|. Die Antwort darauf den Header \lstinline|Access-Control-Allow-Origin: http://foo.example.com| (Wildcards sind auch möglich).
+Dies ist eine mögliche Aufweichung der SOP, denn manchmal ist gerade eine Cross-Domain-Kommunikation zwingend erforderlich.
+Damit schützt sich beispielsweise ein Service-Anbieter (z.B. Google-API), welcher seine Daten ausschliesslich für berechtigte Nutzer oder weitere eigene Domains (z.B. youtube.com) zur Verfügung stellen möchte.\\
+Anfragen an den Service Provider enthalten einen Header \lstinline|Origin: http://foo.example.com|. Die Antwort darauf den Header \lstinline|Access-Control-Allow-Origin: http://foo.example.com| (Es sind auch Wildcards möglich).
 
 \subsubsection{CORS Preflighted Request}
 
-Der Preflight wird ausgeführt, falls eine der folgenden Bedingungen zutrifft:
+Im Gegensatz zur simplen Anfrage wird beim Preflighted Request zuerst über einen HTTP-OPTIONS-Request abgefragt, ob der eigentliche Request sicher gesendet werden kann. Dies wird bei Anfragen gemacht, auf die eine der folgenden Bedingungen zutrifft:
 \begin{easylist}[itemize]
 	& Verwendung einer Methode ausser GET, HEAD oder POST.
-	& POST fordert Daten mit einem anderen Content-Type als \lstinline|application/x-www-form-urlencoded, multipart/form-data oder text/xml| an
+	& POST fordert Daten mit einem anderen Content-Type als \lstinline|application/x-www-form-urlencoded|, \lstinline|multipart/form-data| oder \lstinline|text/xml| an
 	& POST sendet Daten mit einem XML-Payload zum Server.
 \end{easylist}
 
@@ -226,11 +228,11 @@ Der Preflight wird ausgeführt, falls eine der folgenden Bedingungen zutrifft:
 	\caption{Vorgehen beim CORS Preflight}
 \end{figure}
 
-Standardmässig werden bei XMLHttpRequests aufrufen keine Credentials/Cookies mitgeschickt. Um dies zu forcieren, muss ein spezielles Flag (withCredentials) auf dem Request-Objekt gesetzt werden.
+Standardmässig werden bei Cross-Site-XMLHttpRequests-Aufrufen keine Credentials (Cookies) mitgeschickt. Um dies zu forcieren, muss ein spezielles Flag (\lstinline|xmlHttp.withCredentials|) auf dem Request-Objekt gesetzt werden.
 
 \subsection{Content Security Policy - CSP}
-Dahinter versteckt sich ein Sicherheitskonzept, um XSS und diverse andere Angriffe wie Clickjacking und Code Injection, durch einschleusen von Daten in Webseiten zu verhindern. Es wird als HTTP-Header-Field \textit{Content-Security-Policy} und bei IE 10+ \textit{X-Content-Security-Policy} unterstützt.
-Dadurch kann der Server bestimmen von welchem Origin Content geladen werden darf. Trifft auf ein Element mehrere CSPs zu, wird immer die restriktivste benutzt!
+CSP ist ein Sicherheitsstandard, der XSS, Clickjacking und weitere Code-Injection-Attacken verhindern soll. Dabei kann im Server konfiguriert werden, von welcher Origin Content (scripts, images, etc.) geladen werden darf. Treffen auf ein Element mehrere CSPs zu, wird immer die restriktivste benutzt.\\
+CSPs können als HTTP-Response-Header-Feld \textit{Content-Security-Policy} (bei IE 10+ \textit{X-Content-Security-Policy}) oder im HTML Meta Element \lstinline|<meta http-equiv="X-Content-Security-Policy">| definiert werden.
 
 \begin{lstlisting}[caption=Starter Policy für CSP-Header, language={}]
 Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self';
@@ -253,16 +255,28 @@ CSP hat folgende Defaults aktiviert:
 	\item URIs sind nur für Bilder erlaubt
 \end{enumerate}
 
-\subsection{X-Frame-Headers}
-Als HTTP-Header-Feld eingesetzt dient es als Schutz vor \textbf{Clickjacking}-Attacken. Dabei wird dem Opfer ein Frame über ein anderen Inhalt gelegt und so versucht, durch Klicken Aktionen auf dem dahinterliegenden Objekt auszuführen.\\
+\subsection{JSON-Hijacking}
+JSON-Hijacking zielt darauf ab, sensitive Daten, die in JSON Format an einen authentifizierten Empfänger übermittelt werden, zu stehlen. Dabei präpariert der Angreifer eine Seite mit einem JavaScript, welches die Callback-Funktion, den \textit{Property Setter} oder den \textit{Array-Constructor} überschreibt. Als zweites wird ein GET Request auf die verwundbare Seite durchgeführt. Die Response kann dann vom Angreifer verarbeitet und die Daten gespeichert werden.\\
+
+\textbf{Lösung:}
+\begin{easylist}
+	& Token in Request URLs verwenden, sodass diese nicht erraten werden können
+	& JSON Response mit einem Infinite Loop beginnen
+	& JSONP vermeiden (JSONP-Aufrufe sind \textbf{immer verwundbar} für JSON-Hijacking)
+	& Arrays in ein JSON-Objekt einbetten
+\end{easylist}
+
+\subsection{Clickjacking-Attacke}
+Dabei wird dem Opfer ein Frame über einen anderen Inhalt gelegt und so versucht, durch Klicken Aktionen auf dem dahinter liegenden Objekt auszuführen.\\
+Gegenmassnahme: Die \textbf{X-Frame-Options} im HTTP Response Header kann verwendet werden, um zu bestimmen, ob ein aufrufender Browser die Zielseite in einem \lstinline|<frame>|, \lstinline|<iframe>| oder \lstinline|<object>| rendern darf. Webseiten können so unterbinden, dass ihr Content in fremden Seiten eingebettet wird.
 \textbf{CSP hat Vorrang} vor X-Frame-Headers, weil die Unterbindung von Frames seit Version 2.0 dort auch integriert ist.
 
 \begin{lstlisting}[caption=Clickjacking mittels X-Frame-Options unterbinden, language={}]
-X-Frame-Options: DENY
+X-Frame-Options: DENY [SAMEORIGIN, ALLOW-FROM https://example.com/]
 \end{lstlisting}
 
 \subsection{HTTP Strict Transport Security - HSTS}
-Ein Sicherheitsmechanismus für HTTPS-Verbindungen. Er soll vor Aushebelung der Verbindungsverschlüsselung durch eine Downgrade-Attacke als auch vor Session Hijacking schützen. Durch die Angabe des Header-Feldes wird jede weitere Verbindung bis zum erreichen des \textit{max-age} als \textbf{HTTPS erzwungen}, auch wenn die Links z.B. auf HTTP lauten. Zusätzlich wird eine Verbindung mit dem Server verhindert, sobald \textbf{Zertifikatsprobleme} auftauchen.\\
+Ein Sicherheitsmechanismus für HTTPS-Verbindungen. Er soll vor Aushebelung der Verbindungsverschlüsselung durch eine Downgrade-Attacke und vor Session Hijacking schützen. Durch die Angabe des Header-Felds wird jede weitere Verbindung bis zum erreichen des \textit{max-age} als \textbf{HTTPS erzwungen}, auch wenn die Requests z.B. auf HTTP lauten. Zusätzlich wird eine Verbindung mit dem Server verhindert, sobald \textbf{Zertifikatsprobleme} auftauchen.\\
 
 Google Chrome wie auch andere Browser verwenden \textbf{HSTS-Preload-Listen}. Damit wird die Limitierung des \textit{trust on first use}-Prinzip für eine definierte Liste von Domains umgangen.
 
@@ -270,18 +284,18 @@ Google Chrome wie auch andere Browser verwenden \textbf{HSTS-Preload-Listen}. Da
 Strict-Transport-Security: max-age=31536000
 \end{lstlisting}
 
-\textbf{Bypassing HSTS}
-HSTS ist Zeit basiert und wird für eine gewisse Zeit definiert. Um dies zu umgehen, wird die Zeit geändert, wodurch das HSTS abläuft und der Browser ohne warnung auf einen Fake Server zugreift.
+\textbf{Bypassing HSTS}\\
+HSTS ist Zeit basiert und wird für eine gewisse Zeitspanne definiert. Um dies zu umgehen, wird die aktuelle Zeit geändert, wodurch das HSTS abläuft und der Browser ohne Warnung auf einen Fakeserver zugreifen kann.
 
 \subsection{X-XSS-Protection}
-Dieser Header aktiviert den XSS-Schutz im Browser, jedoch kann dieser nur Reflected XSS erkennen. Bisher wird es nur von IE, Chrome und Safari unterstützt. In diesen Browser sollte er jedoch standardmässig bereits aktiviert sein.
+Dieser Header aktiviert den XSS-Schutz im Browser, jedoch kann dieser \textbf{nur Reflected XSS} erkennen. Bisher wird es nur von IE, Chrome und Safari unterstützt. In diesen Browsern sollte er jedoch standardmässig aktiviert sein.
 
 \begin{lstlisting}[language={},caption=Beispiel des X-XSS-Protection Headers]
 X-XSS-Protection: 1; mode=block
 \end{lstlisting}
 
 \subsection{HTTP Public Key Pinning - HPKP}
-Eine Erweiterung für HTTP, das dem Webclient mitteilt, einen spezifischen kryptographischen Schlüssel mit einem bestimmten Webserver in Verbindung zu bringen. So sollen Man-in-the-Middle-Angriffe mit gefälschten Zertifikaten vermieden werden.\\
+Eine Erweiterung für HTTP, die dem Webclient mitteilt, einen spezifischen kryptographischen Schlüssel mit einem bestimmten Webserver in Verbindung zu bringen. So sollen Man-in-the-Middle-Angriffe mit gefälschten Zertifikaten vermieden werden.\\
 
 Google Chrome wie auch Firefox verwenden \textbf{Preload-Listen}. Damit wird die Limitierung des \textit{trust on first use}-Prinzip für eine definierte Liste von Domains umgangen.
 

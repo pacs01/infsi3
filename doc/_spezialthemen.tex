@@ -14,17 +14,6 @@ Unter dem Begriff ist eine Attacke über das \textit{XML External Entity Process
 <foo>&xxe;</foo>
 \end{lstlisting}
 
-\subsection{JSON-Hijacking}
-JSON-Hijacking zielt darauf ab, sensitive Daten, die mittels JSON Format an einen authentifizierten Empfänger übermittelt werden, zu stehlen. Dabei präpariert der Angreifer eine Seite mit einem JavaScript, welches die Callback-Funktion oder den \textit{Property Setter} überschreibt. Als zweites wird ein GET Request auf die verwundbare Seite durchgeführt. Die Response kann dann vom Angreifer verarbeitet werden und die Daten (möglicherweise sensitive Informationen) auf seinem System speichern.\\
-
-\textbf{Lösung:}
-\begin{easylist}
-	& Token in Request URLs verwenden, sodass diese nicht erraten werden können
-	& JSON Response mit einem Infinite Loop beginnen
-	& JSONP vermeiden
-	& Arrays in ein JSON-Objekt einbetten
-\end{easylist} 
-
 \subsection{URL-Redirection}
 URL-Redirection wird häufig im Zusammenhang mit Phishing verwendet, mit dem Ziel, eine Session übernehmen zu können. Dazu wird dem Opfer einen Link untergeschoben, der auf den ersten Blick vertrauenswürdig aussieht. In Wirklichkeit enthält dieser jedoch einen Redirect auf eine Landing-Page des Hackers. Klickt das Opfer auf diesen Link, so wird normal das Login-Formular der vertrauenswürdigen Webseite geladen. Gibt das Opfer nun seine Credentials ein, werden diese auf Korrektheit geprüft und es wird eine Session ausgestellt. Nach dem erfolgreichen Login, wird nun durch Redirection nicht die vertrauenswürdige Webseite geladen, sondern die Landing-Page des Hackers. Dadurch sieht der Hacker im Log seiner Page die ausgestellte Session und kann diese übernehmen. Das Opfer selbst erhält nur eine Meldung, dass die gewünschte Seite nicht erreichbar ist. \\
 
