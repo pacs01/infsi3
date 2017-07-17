@@ -1,7 +1,7 @@
 \section{Mobile Application Security}
 
 \subsection{iOS}
-Basierend auf OSX hat Apple das iOS lanciert. Dabei wurde Objective-C, Swift, und C verwendet. iOS verfügt über Sandbox Mechanismen, ein Data Protection API, Code Signing und den Appstore mit manueller Freischaltung.
+Basierend auf OSX hat Apple das iOS lanciert. Dabei wurde Objective-C, Swift, und C verwendet. iOS verfügt über Sandbox Mechanismen, ein Data Protection API, Code Signing und den Appstore mit manueller Freischaltung und App Review durch Apple.
 
 \begin{figure}[H]
 	\centering
@@ -9,7 +9,14 @@ Basierend auf OSX hat Apple das iOS lanciert. Dabei wurde Objective-C, Swift, un
 	\caption{iOS Data Protection API}
 \end{figure}
 
-Bei iOS ist das \textbf{Permission Model} so eingerichtet, dass bei jeder Verwendung nach Erlaubnis gefragt wird und individuell erlaubt oder abgelehnt werden kann.
+\begin{description}
+	\item[File Key] unique for each file
+	\item[Hardware Key] embedded into Crypto Chip
+	\item[Class Key] depends on passcode and device
+	\item[File System Key] derived from Hardware Key
+\end{description}
+
+Bei iOS ist das \textbf{Permission Model} so eingerichtet, dass bei jeder Verwendung nach Erlaubnis gefragt wird und individuell entschieden werden kann. Das \textit{App-Manifest} beinhaltet keine Permissions.
 
 \subsection{Android}
 Auf Linux basierend in Java und C entstand Andoid, welches von verschiedene Hardware-Anbietern übernommen wurde. Somit hat es auch noch viele alte Versionen auf dem Markt.
@@ -22,12 +29,12 @@ Die \textbf{App Permissions} sind bei Android im Manifest hinterlegt und können
 Windows Phone von Microsoft unterstützt ebenfalls strict sandboxing, Address Space Layout Randomization (ASLR, zufällige Ladeposition von Programmen in Speicher als Schutz gegen Overflow), Bit Locker Verschlüsselung, Data Protection API (ähnlich wie bei iOS), aber auch Gefahren wie automatisches Wi-Fi credential sharing über Facebook, Outlook oder Skype. (In Version 1607 wurde die umstrittene Funktion \textit{Wi-Fi Sense} wieder entfernt.)
 
 \subsection{Xamarin}
-Xamarin ermöglicht die Entwicklung von platformübergreifenden, nativen Apps. Dabei wird das Mono Framework (.NET kompatibel) verwendet und in C\# programmiert, welches zu IL-Code (Microsoft Intermediate Language) kompiliert wird.
+Xamarin ermöglicht die Entwicklung von platformübergreifenden nativen Apps. Dabei wird das Mono .NET Framework verwendet und in C\# programmiert, welches zu IL-Code (Microsoft Intermediate Language) kompiliert wird.
 
 Die native APIs werden zwar zu den .NET namespaces gemapped, jedoch müssen platformabhängige Security Features sowie User Interfaces immer noch für jede Platform geschrieben werden.
 
 \subsection{Cordova (Phonegap)}
-Cordova wird verwendet um Mobile Apps mit HTML, JS und CSS zu entwickeln. Es bringt somit native Funktionalität, basiert aber auf Web View Komponente. Somit fallen jedoch auch alle bekannten Schwachstellen an.
+Cordova wird verwendet um Mobile Apps mit HTML, JS und CSS zu entwickeln. Es bringt somit native Funktionalität, basiert aber auf der WebView Komponente mit all ihren bekannten Schwachstellen. Alternative: eigene native Bridges schreiben und eine hardened WebView verwenden.
 
 \section{OWASP Mobile Top 10}
 \begin{figure}[H]
