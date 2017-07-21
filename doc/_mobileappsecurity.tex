@@ -44,19 +44,19 @@ Cordova wird verwendet um Mobile Apps mit HTML, JS und CSS zu entwickeln. Es bri
 \end{figure}
 
 \subsection{M1: Improper Platform Usage}
-Missbrauch eines Platform Features oder fehlende Sicherheitsmassnahmen, und das somitige Verletzten von Guidelines. \\
+Falsche Verwendung eines Platform Features oder fehlende Sicherheitsmassnahmen, und somit das Verletzten von Guidelines. \\
 
 \textbf{Beispiel}: Zu viele Permissions, unverschlüsseltes Ablegen von Credentials in Property-File anstelle der KeyChain (iOS). \\
 
 \textbf{Lösung}: Konsultieren der Platform Guidelines beim Entwickeln.
 
 \subsection{M2: Insecure Data Storage}
-Durch Ablegen von Daten in unsicherem Speicher oder unvorhergesehenem Datenleak (siehe Unterkapitel) besteht erhöhte Gefahr wenn das Gerät gestohlen wird/verloren geht oder mit Malware infiziert ist nach jailbreak/rooting.
+Durch Ablegen von Daten in unsicherem Speicher oder unvorhergesehenen Datenleaks (siehe folgende Unterkapitel) besteht eine erhöhte Gefahr, wenn das Gerät abhanden kommt oder sich mit Malware infiziert (z.B. nach jailbreak / rooting).
 
 \subsubsection{System Screenshots}
-Das Betriebssystem erstellt ein Screenshot der Anwendung, um diese unter den zuletzt verwendeten Anwendungen darzustellen. Manchmal aber auch in anderen Fällen.\\
+Das Betriebssystem erstellt automatisch einen Screenshot der App, um diese unter den zuletzt verwendeten Anwendungen oder im Task Manager darzustellen.\\
 
-\textbf{Beispiel}: E-Banking Kontoinformationen können eingesehen werden über den Screenshot des Apps. \\
+\textbf{Beispiel}: E-Banking Kontoinformationen können eingesehen werden über den Screenshot der App.\\
 
 \textbf{Lösung}: Screenshots vom System unterbinden oder sensitiven Daten überdecken.
 \begin{lstlisting}[language=C, caption=Lösung für iOS]
@@ -69,9 +69,9 @@ window.addFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE);
 \end{lstlisting}
 
 \subsubsection{Keyboard}
-Viele Keyboards verfügen über Autocomplete. Das iOS zum Beispiel speichert bis zu 500 Wörter.\\
+Viele Keyboards verfügen über Autocomplete. Apples iOS zum Beispiel speichert bis zu 500 Wörter.\\
 
-\textbf{Beispiel}: Passwort Feld unterstütz Autocomplete; Das Passwort wird somit auch an anderen Stellen vorgeschlagen wenn mit dem selben Buchstaben begonnen wird. \\
+\textbf{Beispiel}: Passwort Feld unterstützt Autocomplete; Das Passwort wird somit auch an anderen Stellen vorgeschlagen, wenn mit den selben Buchstaben begonnen wird. \\
 
 \textbf{Lösung}: Autocomplete bei sensitiven Daten deaktivieren.
 \begin{lstlisting}[language=C, caption=Lösung für iOS]
@@ -83,7 +83,7 @@ android:inputType="textNoSuggestions";
 \end{lstlisting}
 
 \subsubsection{Clipboard}
-Standardmässig wird ein globales Clipboard für Copy \& Paste verwendet, und jedes App kann darauf zugreifen. \\
+Standardmässig wird ein globales Clipboard für Copy \& Paste verwendet und jede App kann darauf zugreifen.\\
 \textbf{Beispiel}: Sensitive Daten befinden sich noch im Clipboard aus der E-Banking App.
 
 \textbf{Lösung}: Clipboard leeren oder ein dediziertes Clipboard verwenden.
@@ -92,23 +92,23 @@ UIPasteBoard *uniqueBoard=[UIPasteboard pasteboardWithUniqueName];
 \end{lstlisting}
 
 \subsubsection{Logs}
-Crash- und Applikationslogs können sensitive Daten enthalten. Im Apple System Log (ASL) bei iOS werden sogar alle Logs gecached bis zum nächsten Reboot und auch nicht sandboxed. Bei Android müssen Debug Logs bei der finalen App deaktivieren werden. \\
+Crash- und Applikationslogs können sensitive Daten enthalten. Unter iOS werden im Apple System Log (ASL) alle Einträge bis zum nächsten Reboot gecached (nicht in der Sandbox). Debug Logs sollten bei der finalen App immer deaktivieren werden.\\
 
-\textbf{Beispiel}: Bei gescheitertem Loginversuch speichert das Log Benutzername und Passwort im Log. \\
+\textbf{Beispiel}: Bei gescheitertem Login-Versuch werden im Log Benutzername und Passwort gespeichert.\\
 
-\textbf{Lösung}: Dedizierter Logger für Debug Build der App.
+\textbf{Lösung}: \textbf{Keine sensitiven Daten loggen} und dedizierten Logger für Debug Build der App verwenden.
 
 \subsubsection{Web Data}
-Eine WebView speichert jegliche Daten wie ein konventioneller Web Browser. Dies umfasst ein Web Cache, lokaler Speicher, Cookies, Passwörter die direkt oder in eine Sqlite Datenbank gespeichert werden. \\
+Eine WebView speichert jegliche Daten wie ein konventioneller Web Browser. Dies umfasst einen Web Cache, lokalen Speicher, Cookies und Passwörter, die direkt oder in eine SQLite Datenbank gespeichert werden. \\
 
-\textbf{Beispiel}: Ablegen von unverschlüsselten Passwörtern und Benutzernamen in Sqlite Datenbank.\\
+\textbf{Beispiel}: Ablegen von unverschlüsselten Passwörtern und Benutzernamen in SQLite Datenbank.\\
 
-\textbf{Lösung}: Korrekte Systemspeicher verwenden.
+\textbf{Lösung}: Korrekten Systemspeicher verwenden.
 
 \subsubsection{Inter-Process Communication}
-Apps können URL Handlers registrieren, wobei der Empfänger und die überlieferten Informationen nicht geprüft werden können. Zudem entsteht ein Problem wenn mehrere Apps für ein Handler bestehen. Bei Android kann dann die aufzurufende Applikation gewählt werden, bei iOS wird die zuletzt installierte App automatisch ausgewählt.\\
+Apps können URL Handlers registrieren. Andere Apps können dann darauf Daten senden, wobei der Empfänger nicht verifiziert wird. Zudem entsteht ein Problem, wenn mehrere Apps den selben Handler registrieren. Bei Android kann dann die aufzurufende Applikation ausgewählt werden, bei iOS wird automatisch die zuletzt installierte App verwendet.\\
 
-\textbf{Beispiel}: Sensitive Daten werden bei Aufruf über einen Handler abgefangen.
+\textbf{Beispiel}: Sensitive Daten werden bei einem Aufruf über einen Handler abgefangen.
 \begin{lstlisting}[language=XML, caption=Aufruf von Skype]
 skype://090012312312?call
 \end{lstlisting}
@@ -116,51 +116,50 @@ skype://090012312312?call
 \textbf{Lösung}: Bei Android direkter Aufruf eines Intent aus der anderen App.
 
 \subsection{M3: Insecure Communication}
-Das Verwenden von inkorrekten oder alten SSL Versionen, schwache Protokollaushandlung oder einfach Plain Text Kommunikation.
+In diese Kategorie fallen beispielsweise das Verwenden von inkorrekten oder alten SSL Versionen, schwache Protokollaushandlung oder gar plaintext Kommunikation.
 
-Ab iOS 9 wurde mit \textbf{App Transport Security} durch mimimum Anforderungen eingeführt (TLS 1.2 mit PFS, Zertifikat und SHA-256 Signatur, 2048-bit RSA oder 256-EC Key). Apps unterstehen diesen Vorbestimmungen oder müssen explizite Ausnahmen definieren.
+Ab iOS 9 wurden mit \textbf{App Transport Security} minimale Anforderungen eingeführt (TLS 1.2 mit PFS, Zertifikat und SHA-256 Signatur, 2048-bit RSA oder 256-EC Key). Apps entsprechen diesen Vorbestimmungen oder müssen explizite Ausnahmen definieren.
 
 \subsubsection{Certificate Pinning}
 Standardmässig wird bestimmten Certificate Authorities (CA) vertraut. Deren Root Zertifikate sind auf jedem Gerät vorinstalliert.\\
 
 \textbf{Beispiel}: Die CA wurde gehacked oder ein Attackierer hat dem Gerät eine falsche CA hinzugefügt. \\
 
-\textbf{Lösung}: Certificate Pinning, eingeführt durch Google Chrome. Speichert das Zertifikat oder dessen Public Key in der App und überprüft dieses.
+\textbf{Lösung}: Certificate Pinning, eingeführt durch Google Chrome, speichert das Zertifikat oder dessen Public Key in der App und überprüft dieses bei der Verwendung.
 
 \subsection{M4: Insecure Authentication}
-Das Verletzten von Privacy durch Mitschicken von Gerät-spezifischen Daten, spoofing, vohersehbare Session IDs, oder kein Session Timeout.
+Das Verletzten der Privacy durch Verwenden von Geräte-spezifischen Daten, Spoofing, vorhersehbaren Session IDs oder weglassen eines Session Timeouts.
 
 \subsection{M5: Insufficient Cryptography}
-Schwache Ciphers und/oder Keys, ungeschützte Keys in App, oder sebstgemachte Bastel-Krypto.\\
+Schwache Ciphers und/oder Keys, ungeschützte Keys in der App gespeichert, oder selbstgemachte Krypto-Algorithmen.\\
 
-Android besitzt die Bouncy Castle Library. Alternativ kann dieses auch in die App eingebunden werden als Klon, welches dann Spongycastle genannt wird.\\
-
-iOS hat das Common Crypto API CCCRypt. Die KeyChain kann zudem für asymmetrische Kryptographie verwendet werden. Alternativ kann OpenSSL verwendet werden.
+Android besitzt die \textit{Bouncy Castle Library}. Alternativ kann diese auch als Klon in die App eingebunden werden, welches dann Spongycastle genannt wird. iOS hat das Common Crypto API CCCRypt. Die KeyChain kann zudem für asymmetrische Kryptographie verwendet werden und alternativ steht OpenSSL zur Verfügung.
 
 \subsection{M6: Insecure Authorization}
-Das authorisieren von unerlaubten Benutzern oder Methoden ausführen von zu wenig authorisierten Benutzern. Ein klassisches Beispiel ist \textit{Forced Browsing}.
+Zugangsberechtigungen für nicht autorisierte Benutzer oder das Erlauben von Operationen an nicht dafür vorgesehene Benutzer. Ein klassisches Beispiel ist \textit{Forced Browsing}, das Abrufen von nicht referenzierten, aber trotzdem erreichbaren Inhalten.
 
 \subsection{M7: Client Code Quality}
-Implementationsprobleme wie Buffer Overflows, XSS, format string Schwachstellen etc. Muss im Code selbst gefixed werden.
+Implementationsprobleme wie Buffer Overflows, XSS, format string Schwachstellen etc.\\
+\textbf{Lösung: Sollte direkt im Code gefixed werden.}
 
 \subsection{M8: Code Tampering}
 Es besteht die Möglichkeit dass Code selbst verändert oder ausgetauscht wird. Dazu gibt es mehrere Möglichkeiten:
 
 \begin{description}
-	\item[Binary/Monkey Patching] Runtime Patch ohne Kopie des originalen Source Codes.
+	\item[Binary / Monkey Patching] Runtime Patch ohne Kopie des originalen Source Codes.
 	\item[Resource Modification] Manipulation von lokalen Ressource-Files, welche z.B. URLs beinhalten.
-	\item[Method Hooking] Bei erweiterbaren Frameworks das missbrauchen von Hooks für eigene Zwecke.
+	\item[Method Hooking] Bei erweiterbaren Frameworks das Missbrauchen von Hooks für eigene Zwecke.
 	\item[Method Swizzling] Implementation zweier Methoden austauschen.
-	\item[Jailbreak/Rooting] Root Access zu System, kann aber anhand von Filestrukturen, Libraries oder OS-abhängigen Merkmalen erkannt werden.
+	\item[Jailbreak / Rooting] Root Access zu System erlangen, kann aber anhand von Filestrukturen, Libraries oder OS-abhängigen Merkmalen erkannt werden.
 \end{description}
 
 \subsection{M9: Reverse Engineering}
-Der Code kann eingesehen werden durch Binary Inspection, Dissasembly oder geleaktem Source Code. Gegen die ersten zwei kann ein \textbf{Code Obfuscator} verwendet werden, wie etwa ProGuard im Android SDK. Grundsatz: Verlass dich nicht auf \textit{Security by Obscurity}.
+Der Code kann eingesehen werden durch Binary Inspection, Dissasembly oder geleaktem Source Code. Gegen die ersten zwei Fälle kann ein \textbf{Code Obfuscator} verwendet werden, wie etwa ProGuard im Android SDK. Grundsatz: Verlass dich nicht auf \textit{Security by Obscurity}.
 
 \subsection{M10: Extraneous Functionality}
-Schwachstellen wie Backdoors für die Entwickler, Funktionen die nicht für den Release gedacht wurden sondern lediglich für Tests, oder Passwörter in Kommentaren.
+Schwachstellen wie Backdoors für Entwickler, Funktionen die nicht für den Release gedacht wurden oder Passwörter in Kommentaren.
 
-\subsection{Checkliste}
+\subsection{Secure Coding Checkliste}
 \begin{easylist}[itemize]
 	& Data at Rest
 	&& iOS: DataProtection && Keychain API
