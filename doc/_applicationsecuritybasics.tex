@@ -260,7 +260,7 @@ CSPs können als HTTP-Response-Header-Feld \textit{Content-Security-Policy} (bei
 Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self';
 \end{lstlisting}
 
-Das Vorgehen beim erstellen einer neuen CSP ist wie folgt:
+Das Vorgehen beim Erstellen einer neuen CSP ist wie folgt:
 \begin{enumerate}
 	\item CSP-Header bei allen Requests hinzufügen mit Policy \lstinline[language=clean]|default-src 'none'|
 	\item Verstösse in der Browser-Konsole anschauen
@@ -277,6 +277,13 @@ CSP hat folgende Defaults aktiviert:
 	\item URIs sind nur für Bilder erlaubt
 \end{enumerate}
 
+\subsubsection{X-XSS-Protection}
+Dieser Header aktiviert den XSS-Schutz im Browser, jedoch kann dieser \textbf{nur Reflected XSS} erkennen. Bisher wird es nur von IE, Chrome und Safari unterstützt. In diesen Browsern sollte er jedoch standardmässig aktiviert sein.
+
+\begin{lstlisting}[language={},caption=Beispiel des X-XSS-Protection Headers]
+X-XSS-Protection: 1; mode=block
+\end{lstlisting}
+
 \subsubsection{HTTP Strict Transport Security - HSTS}
 Ein Sicherheitsmechanismus für HTTPS-Verbindungen. Er soll vor Aushebelung der Verbindungsverschlüsselung durch eine Downgrade-Attacke und vor Session Hijacking schützen. Durch die Angabe des Header-Felds wird jede weitere Verbindung bis zum erreichen des \textit{max-age} als \textbf{HTTPS erzwungen}, auch wenn die Requests z.B. auf HTTP lauten. Zusätzlich wird eine Verbindung mit dem Server verhindert, sobald \textbf{Zertifikatsprobleme} auftauchen.\\
 
@@ -288,13 +295,6 @@ Strict-Transport-Security: max-age=31536000
 
 \textbf{Bypassing HSTS}\\
 HSTS ist Zeit basiert und wird für eine gewisse Zeitspanne definiert. Um dies zu umgehen, wird die aktuelle Zeit geändert, wodurch das HSTS abläuft und der Browser ohne Warnung auf einen Fakeserver zugreifen kann.
-
-\subsubsection{X-XSS-Protection}
-Dieser Header aktiviert den XSS-Schutz im Browser, jedoch kann dieser \textbf{nur Reflected XSS} erkennen. Bisher wird es nur von IE, Chrome und Safari unterstützt. In diesen Browsern sollte er jedoch standardmässig aktiviert sein.
-
-\begin{lstlisting}[language={},caption=Beispiel des X-XSS-Protection Headers]
-X-XSS-Protection: 1; mode=block
-\end{lstlisting}
 
 \subsubsection{HTTP Public Key Pinning - HPKP}
 Eine Erweiterung für HTTP, die dem Webclient mitteilt, einen spezifischen kryptographischen Schlüssel mit einem bestimmten Webserver in Verbindung zu bringen. So sollen Man-in-the-Middle-Angriffe mit gefälschten Zertifikaten vermieden werden.\\
