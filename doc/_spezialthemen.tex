@@ -1,6 +1,5 @@
 \section{Spezialthemen}
 
-
 \subsection{XXE File Inclusion}
 Unter dem Begriff ist eine Attacke über das \textit{XML External Entity Processing} möglich. Dabei können externe Daten, wie z.B. lokale Dateien, in das XML inkludiert werden. Bei der Verarbeitung solcher Inclusions, welche im DTD angegeben sind, fügt sie der Parser in die angegebenen Stelle ein.\\
 
@@ -30,12 +29,12 @@ URL-Redirection wird häufig im Zusammenhang mit Phishing verwendet, mit dem Zie
 	&& redirect=acc
 \end{easylist} 
 
-\subsection{HTTP Request Smuggling}
-HTTP Request Smuggling Attacken werden benutzt, um beispielsweise WAFs zu umgehen. Dabei wird die Schwachstelle ausgenutzt, dass verschiedene Sicherheitssysteme HTTP Requests unterschiedlich interpretieren. Beispielsweise kann mit CR/LF (Carriage Return / Line Feed) erreicht werden, dass innerhalb eines einzigen Requests sich zwei Requests befinden. Die WAF erkennt nur den einen, der dahinter verborgene Webserver antwortet jedoch auf beide Requests. Somit können Informationen, die eigentlich nur zwischen WAF und Webserver sichtbar sein sollten, nach "'aussen"' gelangen. Beispielsweise ein Cookie welches zwischen WAF und Webserver einen User authentifiziert.\\
+\subsection{HTTP Request Smuggling / Splitting}
+HTTP Request Smuggling Attacken werden benutzt, um beispielsweise WAFs zu umgehen. Dabei wird die Schwachstelle ausgenutzt, dass verschiedene Sicherheitssysteme HTTP Requests unterschiedlich interpretieren. Beispielsweise kann mit CR/LF (Carriage Return / Line Feed) erreicht werden, dass ein einzelner Request aus zwei unabhängigen Requests besteht. Die WAF erkennt nur den ersten, der dahinter verborgene Webserver antwortet jedoch auf beide Requests. Somit können Informationen, die eigentlich nur zwischen WAF und Webserver sichtbar sein sollten, nach "'aussen"' gelangen. Beispielsweise ein Cookie welches zwischen WAF und Webserver einen User authentifiziert.\\
 
-Oftmals werden die Felder Location und Set-Cookie als Ziel verwendet. Übliche Escape-Sequenzen sind: \lstinline|%0a %0d %0a%0d %0d%0a|
+Oftmals werden die Felder \textit{Location} und \textit{Set-Cookie} als Ziel verwendet. Übliche Escape-Sequenzen sind: \lstinline|%0a %0d %0a%0d %0d%0a|
 
-\begin{lstlisting}[language={},caption=Beispiel eines Präparierten Request zur Umgehung einer Pre-Authentication]
+\begin{lstlisting}[language={},caption=Beispiel eines präparierten Requests zur Umgehung einer Pre-Authentication]
 username=hacker10&url=%2Fsecure%0aSet-Cookie:LOGON=OK; %0aSet-Cookie:MOD_BUT_Username=admin;&lang=EN&password=compass
 \end{lstlisting}
 
@@ -44,7 +43,31 @@ username=hacker10&url=%2Fsecure%0aSet-Cookie:LOGON=OK; %0aSet-Cookie:MOD_BUT_Use
 	& Web Application Firewalls verwenden, die nicht verwundbar gegen HTTP Request Smuggling sind.
 	& Strenges Sessionmanagement verwenden, z.B Session nach jedem Request terminieren.
 	& Aktivieren von Strict Parsing beim Webserver, z.B. Apache.
-\end{easylist} 
+\end{easylist}
+
+\subsection{Mass Assignment Vulnerability}
+Software Frameworks erlauben Entwicklern manchmal HTTP Request Parameter automatisch auf Variablen oder Objekte im Programm Code zu binden. Angreifer können so evtl. nicht vorgesehene Parameter setzen und dadurch möglicherweise das Verhalten einer Methode beeinflussen.\\
+
+\textbf{Beispiel}: Das Autobinding in ASP.NET MVC ist anfällig auf diese Angriffe.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{./img/mass-assignment-vulnerability}
+	\caption{Verwundbarer Beispielcode in ASP.NET MVC}
+\end{figure}
+\begin{lstlisting}[language={},caption=Beispiel eines präparierten Requests zum Setzen eines nicht vorgesehenen Parameters]
+POST /addUser
+FirstName=Scott&isAdmin=true
+\end{lstlisting}
+
+\textbf{Lösung: Es genügt nicht, ein IsAdmin Flag aus dem Editform wegzulassen.}
+
+\begin{description}
+	\item[Whitelist] alle benötigten Parameter explizit binden
+	\item[Blacklist] alle nicht benötigten Parameter explizit ausschliessen
+	\item[Strongly Typed] eine Interface Definition für ein spezifisches Model der benötigten Parameter
+	\item[ReadOnly] in ASP.NET MVC gibt es ein ReadOnly Flag für Model Attribute
+	\item[Architektonischer Ansatz] Es gibt hier mehrere Ansätze, einer davon ist der Einsatz von DTOs (Data Transfer Objects).
+\end{description}
 
 \subsection{SSL/TLS: SSL-Cipher-Suite-Hardening, SSL-MitM}
 
