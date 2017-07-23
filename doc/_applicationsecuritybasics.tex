@@ -284,23 +284,43 @@ Dieser Header aktiviert den XSS-Schutz im Browser, jedoch kann dieser \textbf{nu
 X-XSS-Protection: 1; mode=block
 \end{lstlisting}
 
+\subsection{SSL / TLS Verschlüsselung}
+
+\subsubsection{Perfect Forward Secrecy - PFS}
+Wenn zuvor ausgetauschte Langzeitschlüssel verwendet werden, um für jede zu verschlüsselnde Sitzung einen neuen geheimen Sitzungsschlüssel zu vereinbaren. Ein Protokoll hat \textit{Perfect Forward Secrecy}, wenn die verwendeten Sitzungsschlüssel nach Beendigung der Sitzung nicht mehr aus den geheimen Langzeitschlüsseln rekonstruiert werden können. Damit kann eine aufgezeichnete verschlüsselte Kommunikation auch bei Kenntnis des Langzeitschlüssels nicht nachträglich entschlüsselt werden.
+
 \subsubsection{HTTP Strict Transport Security - HSTS}
-Ein Sicherheitsmechanismus für HTTPS-Verbindungen. Er soll vor Aushebelung der Verbindungsverschlüsselung durch eine Downgrade-Attacke und vor Session Hijacking schützen. Durch die Angabe des Header-Felds wird jede weitere Verbindung bis zum erreichen des \textit{max-age} als \textbf{HTTPS erzwungen}, auch wenn die Requests z.B. auf HTTP lauten. Zusätzlich wird eine Verbindung mit dem Server verhindert, sobald \textbf{Zertifikatsprobleme} auftauchen.\\
+Ein Sicherheitsmechanismus für HTTPS-Verbindungen. Er soll vor Aushebelung der Verbindungsverschlüsselung durch eine Downgrade-Attacke (z.B. \textit{sslstrip}) und vor Session Hijacking schützen. Durch die Angabe eines Header-Felds mit Hilfe von \textbf{mod\_headers} wird jede weitere Verbindung bis zum Erreichen der \textit{max-age} als \textbf{HTTPS erzwungen}, auch wenn ein Request oder die Seite selbst HTTP festlegen. Zusätzlich wird eine Verbindung mit dem Server unterbunden, sobald \textbf{Zertifikats-Probleme} auftauchen.\\
 
-Google Chrome wie auch andere Browser verwenden \textbf{HSTS-Preload-Listen}. Damit wird die Limitierung des \textit{trust on first use}-Prinzip für eine definierte Liste von Domains umgangen.
+Google Chrome, wie auch andere Browser verwenden \textbf{HSTS-Preload-Listen}. Damit wird die Limitierung des \textit{trust on first use}-Prinzip für eine definierte Liste von Domains umgangen.
 
-\begin{lstlisting}[language={},caption=HSTS-Header]
-Strict-Transport-Security: max-age=31536000
+\begin{lstlisting}[language={},caption=HSTS-Header mit einer max-age von 30 Tagen]
+Strict-Transport-Security: max-age=2592000 [; includeSubdomains]
 \end{lstlisting}
 
 \textbf{Bypassing HSTS}\\
-HSTS ist Zeit basiert und wird für eine gewisse Zeitspanne definiert. Um dies zu umgehen, wird die aktuelle Zeit geändert, wodurch das HSTS abläuft und der Browser ohne Warnung auf einen Fakeserver zugreifen kann.
+HSTS ist Zeit-basiert (\textit{NTP}) und wird für eine gewisse Zeitspanne definiert. Um dies zu umgehen, wird die aktuelle Zeit geändert, wodurch das HSTS abläuft und der Browser ohne Warnung auf einen Fake-Server zugreift.
 
 \subsubsection{HTTP Public Key Pinning - HPKP}
-Eine Erweiterung für HTTP, die dem Webclient mitteilt, einen spezifischen kryptographischen Schlüssel mit einem bestimmten Webserver in Verbindung zu bringen. So sollen Man-in-the-Middle-Angriffe mit gefälschten Zertifikaten vermieden werden.\\
+Der Browser erhält von der besuchten Website eine Liste mit allen gültigen Public Keys und speichert diese lokal ab. Wird bei einer späteren Verbindung ein Schlüssel verwendet, der nicht in dieser Liste ist, erscheint dem Benutzer eine Fehlermeldung, die nicht (leicht) zu umgehen ist. So sollen Man-in-the-Middle-Angriffe mit gefälschten Zertifikaten vermieden werden.\\
 
 Google Chrome wie auch Firefox verwenden \textbf{Preload-Listen}. Damit wird die Limitierung des \textit{trust on first use}-Prinzip für eine definierte Liste von Domains umgangen.
 
 \begin{lstlisting}[language={},caption=Beispiel des HPKP-Headers]
 Public-Key-Pins: pin-sha256="base64=="; max-age=expireTime [; includeSubdomains][; report-uri="reportURI"]
 \end{lstlisting}
+
+\subsubsection{Certificate Revocation}
+Wird der Private Key eines Zertifikats gestohlen oder "'geknackt"', so muss es natürlich als ungültig erklärt werden. Dies geschieht über die \textbf{Certificate Revocation List (CRL)}, die durch die \textit{Certificate Authority (CA)} verwaltet wird, welche bereits das Zertifikat ausgestellt hat. Die URL zur CRL ist Teil des Server-Zertifikats.\\
+
+Der Eintrag in der CRL kann mit Hilfe des \textbf{Online Certificate Status Protocol (OCSP)} abgefragt werden. \textbf{Dies sollte vor jeder Verwendung eines Zertifikats automatisch gemacht werden.}
+
+\subsubsection{Mutual Authentication / Two-Way Authentication}
+Dies ist theoretisch ein absoluter Schutz gegen \textit{Man-in-the-Middle-Angriffe}, wird in der Praxis aber selten eingesetzt, da die Benutzerfreundlichkeit darunter leidet.
+Nebst dem Server-Zertifikat muss nun auch der Client ein Zertifikat bereitstellen, das der Server überprüfen kann. Durch diese zweifache Authentifizierung ist ein MITM-Angriff, zumindest im Network-Layer, ausgeschlossen.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{./img/mutual-authentication}
+	\caption{Beispielablauf eines fehlgeschlagenen Man-in-the-Middle-Angriffs}
+\end{figure}
