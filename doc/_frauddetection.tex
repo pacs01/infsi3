@@ -1,34 +1,37 @@
 \section{Fraud Detection}
 Fraud Detection beschreibt das Vorgehen um Betrugsfälle, wie zum Beispiel beim E-Banking, möglichst schnell zu erkennen und zu melden. Dabei wird der Computer als Hilfsmittel verwendet. Bis jetzt ist die Quote der gefundenen Fälle per Fraud Detection noch sehr gering. Weit über die Hälfte der Fälle werden durch Hinweise oder ein Management Review gefunden.
 
-\subsection{Panopticlick / Client Correlator}
-Panopticlick ist ein Softwareprojekt der Electronic Frontier Foundation (EFF). Das Konzept hinter der Software liegt darin, den Benutzer bei Besuch einer Webseite zu identifizieren, ohne dass dieser sich authentifizieren muss. Dafür wird ein Javascript auf dem Client ausgeführt, welches Informationen über den Browser sammelt. Daraus wird eine \textit{CCID} (Client Correlation ID) generiert. Diese wird auf dem Server mit bisherigen CCIDs verglichen. Somit kann man feststellen ob der Request von einem bereits bekannten Gerät kommt oder nicht. Um den Fingerprint des Browsers zu erstellen werden unter anderem folgende Daten einbezogen:
+\subsection{Client Correlator / Panopticlick}
+Panopticlick ist ein Softwareprojekt der Electronic Frontier Foundation (EFF). Das Konzept hinter der Software liegt darin, den Benutzer beim Besuch einer Webseite zu identifizieren, ohne dass dieser sich authentifizieren muss. Dafür wird ein Javascript auf dem Client ausgeführt, welches Informationen über den Browser sammelt und daraus eine \textbf{Client Correlation ID (CCID)} generiert. Diese wird auf dem Server mit bisherigen CCIDs verglichen. Somit kann man feststellen, ob der Request von einem bereits bekannten Gerät kommt oder nicht.\\
+Für den Fingerprint des Browsers werden unter anderem folgende Daten miteinbezogen:
 \begin{easylist}[itemize]
 	& Verschlüsselte IP
-	& Installierte Fonts
-	& Installierte Plugins
+	& Installierte Fonts und Plugins
+	& Time Zone Settings
 	& Screen Resolution
 	& Name des OS
 	& User Agent String
 \end{easylist}
 
+\subsection{Evercookie}
+Evercookie ist eine JavaScript API, die sogenannte \textit{Zombie Cookies} erstellt, welche sich nur schwer wieder löschen lassen. Das Ziel ist, Benutzer auch nach Löschen der Standard-Cookies noch identifizieren zu können.\\
+Evercookies werden auch von der NSA verwendet, um Tor-User zu verfolgen.
+
 \subsection{E-Banking}
-E-Banking Systeme Verwenden zwei unterscheidliche Informationstypen um allfällige Frauds zu erkennen. Sollte bei der Überprüfung ein Verdacht auftauchen, kann die Transaktion gesperrt oder zum Beispiel per Telefon vom User bestätigt werden.
+E-Banking Systeme Verwenden zwei unterschiedliche Informationsquellen, um allfällige Frauds zu erkennen. Sollte bei der Überprüfung ein Verdacht auftauchen, kann die Transaktion gesperrt oder zum Beispiel per Telefon vom Benutzer eine Bestätigung verlangt werden.
 
 \subsubsection{Technische Daten}
-Die Technischen Daten werden aus der Session gelesen. Die ausgelesenen Daten werden gegen alte gesammelte Daten verglichen.
-Unter Anderem werden folgende Daten verwendet:
+Die technischen Daten werden aus der Session gelesen und mit alten gesammelten Daten verglichen. Zu grosse Unterschiede lösen einen Verdacht aus. Unter Anderem werden folgende Daten verwendet:
 \begin{easylist}[itemize]
 	& User Agent
 	& Source IP
-	& Zeit
+	& Uhrzeit, durchschnittliche Anmeldedauer
 	& Tippgeschwindigkeit
-	& Durchschnittliche eingeloggte Zeit
+	& Clickstream
 \end{easylist}
 
 \subsubsection{Business Informationen}
-Bei den Business Informationen geht es um die getätigte Transaktion selber. Aufgrund dieser Daten könnte eine Fraud Transaction eventuell erkannt werden.
-folgende Punkte werden untersucht:
+Business Informationen sind die Daten der zu tätigenden Transaktion. Bekannte unseriöse Adressaten oder zu hohe Beträge lösen beispielsweise einen Verdacht aus. Folgende Daten werden gesammelt:
 \begin{easylist}[itemize]
 	& Betrag
 	& erstmalige Zahlung
@@ -36,26 +39,19 @@ folgende Punkte werden untersucht:
 \end{easylist}
 
 \subsection{Data Mining}
-Data Mining beschreibt den Vorgang, um aus riesigen Mengen von Daten und Datensätzen, die wichtigen Informationen und zusammenhänge herauszufiltern.
-Diese Fähigkeit, wichtige Informationen aus einer grossen Masse zu filtern, ist besonders für Vorhersagen oder Machine Learning interessant.
-Durch Data Mining werden die Daten in Gruppen unterteilt.
-Drei Common Tasks sind besonders nützlich für Fraud Detection:
-\begin{easylist}[itemize]
-	& Classification: Predictive, Kunden mit einer guten Kreditwürdigkeit suchen zum Beispiel
-	& Clustering: Descriptive, Alle Kunden mit ähnlichem Einkaufsverhalten gruppieren
-	& Association Rules: Artikel finden die oft mit dem gekauften zusammen gekauft werden
-\end{easylist}
+Data Mining beschreibt den Vorgang, aus riesigen Datenmengen die wichtigen Informationen und Zusammenhänge herauszufiltern.
+Diese Fähigkeit ist besonders für Vorhersagen oder \textit{Machine Learning} interessant. Im Gegensatz zu Datenbankabfragen sind beim Data Mining meist keine genauen Filterwerte bekannt und die Abfragen um einiges komplexer. Die Daten werden in Gruppen mit bestimmten Gemeinsamkeiten unterteilt.\\
+Folgende drei Abfragetypen sind besonders nützlich in der Fraud Detection:
+\begin{description}
+	\item[Classification] z.B. Alle Kunden mit einer guten Kreditwürdigkeit finden
+	\item[Clustering] z.B. Alle Kunden mit ähnlichem Einkaufsverhalten gruppieren
+	\item[Association Rules] z.B. Alle Artikel finden, die kürzlich zusammen mit Milch gekauft wurden
+\end{description}
 
 \subsection{Machine Learning}
-Aufgrund der Informationen aus den Data Minings können Machine Learning Algorithmen eingesetzt werden, um zum Beispiel eine Transaktion als Verdächtig oder Harmlos einzustufen. Dies geschieht immer aufgrund bisher erhaltenen Transaktionen. Der Input (Neue Transaktion) wird also nacher als Richtwert für die nachfolgenden Transaktionen verwendet. So lernt der Automat dann von alleine. In der Vorlesung wurden verschiedene Algorithmen aufgezeigt:
-\begin{easylist}[itemize]
-	& Dempster–Shafer Theory
-	& BLAST-SSAHA Hybridization
-	& Hidden Markov Model
-	& Evolutionary-fuzzy System
-\end{easylist}
+Aufgrund der Informationen aus den Data Minings können Machine Learning Algorithmen eingesetzt werden, um zum Beispiel eine Transaktion als verdächtig oder harmlos einzustufen. Dies geschieht immer aufgrund bisher erhaltener Transaktionen. Der Input (neue Transaktion) wird also nachher als Richtwert für die nachfolgenden Transaktionen verwendet. So lernt der Automat von alleine.
 
 \subsection{Vorteile / Nachteile}
-Die aufgezeigten Systeme können bereits automatisiert betrügerische Zahlungen erkennen und diese Melden, damit sie z.B. durch ein Mensch weiterverarbeitet werden. Je mehr Daten über den eigentlichen Benutzer zur verfügung stehen, umso besser funktioniert das ganze System. Ein automatisches System kann schneller reagieren und den Betrüger bereits stoppen, bevor ein Schaden entstanden ist.\\
+Die aufgezeigten Systeme können bereits automatisiert betrügerische Zahlungen erkennen und diese Melden, damit sie z.B. durch einen Menschen geprüft werden. Je mehr Daten über den Benutzer zur Verfügung stehen, umso besser funktionieren diese Techniken. Ein automatisiertes System kann schneller reagieren und den Betrüger bereits stoppen, bevor ein Schaden entsteht.\\
 
-Diese Fraud-Detection bringt jedoch viele Nachteile mit sich. Es ist es sehr aufwändig, ein solches System einzurichten und zu Betreiben. Damit sind grosse Kosten verbunden, denn es existieren kaum standardisierte Lösungen und auch keine ausgearbeiteten Konzepte. Zudem liefert es immer noch viele False Positives. Daher wird der Mensch wohl weiterhin eine zentrale Rolle spielen.
+Diese Techniken bringen jedoch auch Nachteile mit sich. Es ist sehr aufwändig, ein solches System einzurichten und zu betreiben. Damit sind grosse Kosten verbunden, denn es existieren kaum standardisierte Lösungen. Zudem werden immer noch viele \textit{False Positives} gemeldet. Daher wird der Mensch in der Fraud Detection wohl weiterhin eine zentrale Rolle spielen.
