@@ -53,9 +53,9 @@ Statistisch gesehen existiert für eine neu entdeckte Sicherheitslücke nach \te
 \end{easylist}
 
 \subsection{Unix Process Security}
-Unter Linux ist ein weit verbreiteter Ansatz in der Prozess-Sicherheit die \textbf{Isolierung durch Chroot} (change root). Dabei wird dem Prozess ein angegebenes Verzeichnis als Root vorgegaukelt. Innerhalb des neuen Root-Verzeichnis befinden sich alle für den Service nötigen Dateien. Er kann dabei nicht auf Dateien zugreifen, welche sich ausserhalb des neuen Root-Directories besitzen. Man spricht dabei auch von einem \textbf{Jail}.\\
+Ein Prozess sollte möglichst wenig Rechte haben. Die Files gehören jemand anderem, so dass ein Exploit, der mit den Rechten des Prozesses läuft, sich selbst nicht verändern kann.\\
 
-Durch Schwachstellen im Unix-Kernel ist es aber trotzdem möglich, aus diesem Jail auszubrechen.
+Ein weiterer verbreiteter Ansatz ist die \textbf{Isolierung durch Chroot} (change root). Dabei wird dem Prozess ein angegebenes Verzeichnis als Root vorgegaukelt. Innerhalb des neuen Root-Verzeichnis befinden sich alle für den Service nötigen Dateien. Er kann dabei nicht auf Dateien zugreifen, welche sich ausserhalb des neuen Root-Directories befinden. Man spricht dabei auch von einem \textbf{Jail}.
 
 \subsection{File Permissions}
 Die Berechtigungen auf Dateisystemebene sollten so restriktiv wie möglich sein. Grundsätze:\\
